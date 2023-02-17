@@ -79,38 +79,31 @@ public:
 		delete[] mainMap;
 	}
 
-	void printField()
-	{
-		for (int i = 0; i < length; i++)
-		{
-			for (int j = 0; j < length; j++)
-			{
-				cout << mainMap[i][j];
-			}
-			cout << endl;
-		}
-		cout << endl;
-	}
+	//void printField()
+	//{
+	//	for (int i = 0; i < length; i++)
+	//	{
+	//		for (int j = 0; j < length; j++)
+	//		{
+	//			cout << mainMap[i][j];
+	//		}
+	//		cout << endl;
+	//	}
+	//	cout << endl;
+	//}
 };
 
 int main()
 {
+	// можно ваще убрать поле, оставив только начальное и чекать в 2 цикле по координатам, встретился ли X
 	ifstream inputFile;
-	string inputFilePath;
-	cout << "Input File: ";
-	cin >> inputFilePath;
-	inputFile.open(inputFilePath);
+	inputFile.open("input.txt");
 
 	int N;
 	inputFile >> N;
 
 	ofstream outputFile;
-	string outputFilePath;
-	cout << "Output File: ";
-	cin >> outputFilePath;
-	outputFile.open(outputFilePath);
-
-
+	outputFile.open("output.txt");
 
 	queue<Field> q;
 	queue<Field> qWIN;
@@ -163,7 +156,6 @@ int main()
 
 		}
 	}
-
 	while (!q.empty())
 	{
 		Field tempfatherF(q.front());
@@ -183,34 +175,35 @@ int main()
 				isPlaced = true;
 
 			}
-			for (int j = 0; j < tempfatherF.length; j++)
+
+			if (isPlaced)
 			{
-				bool isPossibleToSkip = false;
-				for (int k = tempsonF.col; k < tempfatherF.length; k++)
+				for (int j = 0; j < tempfatherF.length; j++)
 				{
-					if (tempsonF.mainMap[i][k] == '.')
+					for (int k = tempsonF.col; k < tempfatherF.length; k++)
 					{
-						tempsonF.mainMap[i][k] = '=';
-					}
-					if (tempsonF.mainMap[j][k] == '.')
-					{
-						if (k == tempsonF.col)
+						if (tempsonF.mainMap[i][k] == '.')
 						{
-							tempsonF.mainMap[j][k] = '=';
+							tempsonF.mainMap[i][k] = '=';
 						}
-						if (abs(i + tempsonF.col) == abs(j + k))
+						if (tempsonF.mainMap[j][k] == '.')
 						{
-							tempsonF.mainMap[j][k] = '=';
-						}
-						if (abs(j - i) == abs(k - tempsonF.col))
-						{
-							tempsonF.mainMap[j][k] = '=';
+							if (k == tempsonF.col)
+							{
+								tempsonF.mainMap[j][k] = '=';
+							}
+							if (abs(i + tempsonF.col) == abs(j + k))
+							{
+								tempsonF.mainMap[j][k] = '=';
+							}
+							if (abs(j - i) == abs(k - tempsonF.col))
+							{
+								tempsonF.mainMap[j][k] = '=';
+							}
 						}
 					}
 				}
-			}
-			if (isPlaced)
-			{
+
 				tempsonF.col = tempsonF.col++;
 				q.push(tempsonF);
 				if (tempsonF.col == N)
@@ -228,10 +221,9 @@ int main()
 
 	int counter = 0;
 
-	while (!qWIN.empty())
+	while (qWIN.empty())
 	{
 		Field winField(qWIN.front());
-		//winField.printField();
 		for (int i = 0; i < N; i++)
 		{
 			for (int j = 0; j < N; j++)
