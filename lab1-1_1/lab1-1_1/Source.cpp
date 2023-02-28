@@ -46,22 +46,12 @@ void exploreNeighbours(Point p, vector<vector<char>>& mainVector, int n, int& co
 		if ((nextPoint.x == 0 && nextPoint.y == -1) || (nextPoint.x == -1 && nextPoint.y == 0)) continue;
 		if ((nextPoint.x == n && nextPoint.y == n - 1) || (nextPoint.x == n - 1 && nextPoint.y == n)) continue;
 
-		if (nextPoint.x < 0 || nextPoint.x > n - 1)
-		{
-			counter++;
-			continue;
-		}
-		if (nextPoint.y < 0 || nextPoint.y > n - 1)
+		if ((nextPoint.x < 0 || nextPoint.x > n - 1) || (nextPoint.y < 0 || nextPoint.y > n - 1)  || (mainVector[nextPoint.y][nextPoint.x] == '#'))
 		{
 			counter++;
 			continue;
 		}
 
-		if (mainVector[nextPoint.y][nextPoint.x] == '#')
-		{
-			counter++;
-			continue;
-		}
 		if (mainVector[nextPoint.y][nextPoint.x] == 'O')
 		{
 			continue;
@@ -106,14 +96,6 @@ int main()
 		mainVector[pointStart.y][pointStart.x] = 'O';
 		exploreNeighbours(pointStart, mainVector, n, counter);
 	}
-
-	Point pointFinish{ n - 1,n - 1 };
-	if (mainVector[pointFinish.y][pointFinish.x] == '.')
-	{
-		mainVector[pointFinish.y][pointFinish.x] = 'O';
-		exploreNeighbours(pointFinish, mainVector, n, counter);
-	}
-
 	outputFile << (counter * 9);
 	return 0;
 }
