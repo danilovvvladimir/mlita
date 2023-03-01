@@ -96,6 +96,13 @@ int main()
 		mainVector[pointStart.y][pointStart.x] = 'O';
 		exploreNeighbours(pointStart, mainVector, n, counter);
 	}
+
+	Point pointEnd{ n-1,n-1 };
+	if (mainVector[pointEnd.y][pointEnd.x] == '.')
+	{
+		mainVector[pointEnd.y][pointEnd.x] = 'O';
+		exploreNeighbours(pointEnd, mainVector, n, counter);
+	}
 	outputFile << (counter * 9);
 	return 0;
 }
