@@ -27,13 +27,11 @@
 #include <vector>
 #include <fstream>
 #include <optional>
-#include <set>
 #include <map>
 
-using MemoMap = std::map<int, std::optional<std::vector<int>>>;
-
-void HandleInput(std::istream& inputStream, int& sum, int& coinAmount, std::vector<int>& coinValues)
+void HandleInput(std::istream& inputStream, int& sum, std::vector<int>& coinValues)
 {
+	int coinAmount = 0;
 	inputStream >> sum >> coinAmount;
 	int value = 0;
 	for (int i = 0; i < coinAmount; i++)
@@ -46,8 +44,8 @@ void HandleInput(std::istream& inputStream, int& sum, int& coinAmount, std::vect
 std::optional<std::vector<int>> FindCombination(int sum, const std::vector<int>& coinValues)
 {
 	std::vector<std::optional<std::vector<int>>> table(sum + 1, std::nullopt);
-	std::vector<int> temp;
-	table[0] = temp;
+	std::vector<int> firstAssignedCell;
+	table[0] = firstAssignedCell;
 
 	for (int i = 0; i < sum + 1; i++)
 	{
@@ -109,16 +107,15 @@ void HandleOutput(std::ostream& output, const std::optional<std::vector<int>>& r
 int main()
 {
 	int sum = 0;
-	int coinAmount = 0;
 	std::vector<int> coinValues;
 
-	std::ifstream inputFile("input2.txt");
+	std::ifstream inputFile("input.txt");
 	if (!inputFile.is_open())
 	{
 		return 1;
 	}
 
-	HandleInput(inputFile, sum, coinAmount, coinValues);
+	HandleInput(inputFile, sum, coinValues);
 
 	std::optional<std::vector<int>> resultCombination = FindCombination(sum, coinValues);
 
