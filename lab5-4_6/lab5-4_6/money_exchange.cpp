@@ -43,37 +43,33 @@ void HandleInput(std::istream& inputStream, int& sum, int& coinAmount, std::vect
 	}
 }
 
-std::optional<std::vector<int>> FindCombination(int sum, const std::vector<int>& coinValues, MemoMap& memo)
+std::optional<std::vector<int>> FindCombination(int sum, const std::vector<int>& coinValues)
 {
-	if (memo.find(sum) != memo.end()) return memo[sum];
-	if (sum == 0)
+	std::vector<std::optional<std::vector<int>>> table(sum + 1, std::nullopt);
+	std::vector<int> temp;
+	table[0] = temp;
+
+	for (int i = 0; i < sum + 1; i++)
 	{
-		std::vector<int> v;
-		return v;
-	}
-	if (sum < 0) return std::nullopt;
-
-	std::optional<std::vector<int>> shortestCombination = std::nullopt;
-
-	for (auto num : coinValues)
-	{
-		const int remainder = sum - num;
-		auto remainderResult = FindCombination(remainder, coinValues, memo);
-
-		if (remainderResult)
+		if (table[i])
 		{
-			std::vector<int> combination = remainderResult.value();
-			combination.push_back(num);
-
-			if (!shortestCombination || shortestCombination.value().size() > combination.size())
+			for (auto num : coinValues)
 			{
-				shortestCombination = combination;
+				std::vector<int> combination = table[i].value();
+				combination.push_back(num);
+
+				if (i+num < sum+1)
+				{
+					if (!table[i + num] || table[i + num].value().size() > combination.size())
+					{
+						table[i + num] = combination;
+					}
+				}
 			}
 		}
 	}
 
-	memo.emplace(sum, shortestCombination);
-	return shortestCombination;
+	return table[sum];
 }
 
 void HandleOutput(std::ostream& output, const std::optional<std::vector<int>>& resultCombination)
@@ -110,28 +106,27 @@ void HandleOutput(std::ostream& output, const std::optional<std::vector<int>>& r
 
 }
 
-std::optional<std::vector<int>> FindCombinationMemoization(int targetSum, const std::vector<int>& numbers)
-{
-	MemoMap memo;
-	return FindCombination(targetSum, numbers, memo);
-}
-
 int main()
 {
 	int sum = 0;
 	int coinAmount = 0;
 	std::vector<int> coinValues;
 
-	std::ifstream inputFile("input4.txt");
+	std::ifstream inputFile("input2.txt");
 	if (!inputFile.is_open())
 	{
 		return 1;
 	}
 
 	HandleInput(inputFile, sum, coinAmount, coinValues);
-	std::optional<std::vector<int>> resultCombination = FindCombinationMemoization(sum, coinValues);
 
-	HandleOutput(std::cout, resultCombination);
-	//std::vector<std::vector<int>> table(sum + 1, std::vector<int>(sum+1, 0));
+	std::optional<std::vector<int>> resultCombination = FindCombination(sum, coinValues);
+
+	std::ofstream outputFile("output.txt");
+	if (!outputFile.is_open())
+	{
+		return 1;
+	}
+	HandleOutput(outputFile, resultCombination);
 	return 0;
 }
