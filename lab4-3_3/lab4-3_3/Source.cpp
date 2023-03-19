@@ -31,31 +31,29 @@
 #include <fstream>
 #include <vector>
 
-constexpr size_t INITIAL_ROW = 0;
-constexpr size_t INITIAL_COST = 0;
-constexpr size_t MIN_CUTTING_POINT = 0;
-constexpr size_t NO_COST = -1;
-
-typedef std::vector<int> CuttingPoints;
-typedef std::vector<int> CostRow;
-typedef std::vector<CostRow> CostTable;
-
 struct TablePosition
 {
-	size_t x;
-	size_t y;
+	int firstPoint;
+	int secondPoint;
 };
 
-
-
-int GetMinCostTableCell(TablePosition& position, CostTable& costTable, CuttingPoints& cuttingPoints)
+int GetMinTableCost(TablePosition& position, std::vector<std::vector<int>>& costTable, std::vector<int> & cuttingPoints)
 {
-	int cost = NO_COST;
-	int length = cuttingPoints[position.y] - cuttingPoints[position.x];
-	for (size_t i = position.x + 1; i < position.y; ++i)
+	int cost = -1;
+	int cutPoiX = cuttingPoints[position.firstPoint];
+	int cutPoiY = cuttingPoints[position.secondPoint];
+	//int length = cuttingPoints[position.y] - cuttingPoints[position.x];
+	int length = cutPoiY - cutPoiX;
+
+	for (size_t i = position.firstPoint + 1; i < position.secondPoint; ++i)
 	{
-		int currCost = costTable[position.x][i] + costTable[i][position.y] + length;
-		if (currCost < cost || cost == NO_COST)
+		int tempX = costTable[position.firstPoint][i];
+		int tempY = costTable[i][position.secondPoint];
+
+		//int currCost = costTable[position.x][i] + costTable[i][position.y] + length;
+		int currCost = tempX +tempY + length;
+
+		if (currCost < cost || cost == -1)
 		{
 			cost = currCost;
 		}
@@ -64,71 +62,73 @@ int GetMinCostTableCell(TablePosition& position, CostTable& costTable, CuttingPo
 	return cost;
 }
 
-void PrintCostTable(CostTable& costTable)
+void PrintTable(std::vector<std::vector<int>>& table)
 {
+	int tableSize = table.size();
 	std::cout << "X " << "\t";
-	for (int i = 0; i < costTable.size(); i++)
+	for (int i = 0; i < tableSize; i++)
 	{
 		std::cout << i << "\t";
 	}
 	std::cout << std::endl;
-	for (int i = 0; i < costTable.size(); i++)
+
+	for (int i = 0; i < tableSize; i++)
 	{
 		std::cout << "---------";
 	}
 	std::cout << std::endl;
-	for (int i = 0; i < costTable.size(); i++)
+
+	for (int i = 0; i < tableSize; i++)
 	{
 		std::cout << i << "|\t";
-		for (int j = 0; j < costTable.size(); j++)
+		for (int j = 0; j < tableSize; j++)
 		{
-			std::cout << costTable[i][j] << "\t";
+			std::cout << table[i][j] << "\t";
 		}
 		std::cout << std::endl;
 	}
+
 	std::cout << "------------------------------------" << std::endl;
 	std::cout << std::endl;
 }
 
-void FillMinCostTable(CostTable& costTable, CuttingPoints& cuttingPoints)
+
+int GetMinCostTable(std::vector<int> & cuttingPoints)
 {
-	size_t column = INITIAL_ROW + 1;
-	while (column < cuttingPoints.size())
+	int tableSize = cuttingPoints.size();
+	std::vector<std::vector<int>> table(tableSize, std::vector<int>(tableSize, 0));
+
+	PrintTable(table);
+
+	for (int column = 1; column < tableSize; column++)
 	{
-		TablePosition currPosition = { INITIAL_ROW, column };
-		for (; currPosition.x < cuttingPoints.size() && currPosition.y < cuttingPoints.size();
-			++currPosition.x, ++currPosition.y)
+		TablePosition currPosition = { 0, column };
+
+		while ((currPosition.firstPoint < tableSize) && (currPosition.secondPoint < tableSize))
 		{
-			if (currPosition.y <= currPosition.x + 1)
+			if (currPosition.secondPoint <= currPosition.firstPoint + 1)
 			{
+				currPosition.firstPoint++, currPosition.secondPoint++;
 				continue;
 			}
 
-			int currCost = GetMinCostTableCell(currPosition, costTable, cuttingPoints);
-			if (currCost != NO_COST)
+			int currentCost = GetMinTableCost(currPosition, table, cuttingPoints);
+
+			if (currentCost != -1)
 			{
-				costTable[currPosition.x][currPosition.y] = currCost;
+				table[currPosition.firstPoint][currPosition.secondPoint] = currentCost;
 			}
 
-			PrintCostTable(costTable);
+			PrintTable(table);
+
+			currPosition.firstPoint++, currPosition.secondPoint++;
 		}
-		column++;
 	}
+
+	return table[0][tableSize-1];
 }
 
-CostTable GetMinCostTable(CuttingPoints& cuttingPoints)
-{
-	int tableSize = cuttingPoints.size();
-	CostTable result(tableSize, CostRow(tableSize, INITIAL_COST));
-
-	PrintCostTable(result);
-
-	FillMinCostTable(result, cuttingPoints);
-
-	return result;
-}
-
-void HandleInput(std::istream& inputStream, int& L, int& N, CuttingPoints& cuttingPoints)
+void HandleInput(std::istream& inputStream, int& L, int& N, std::vector<int>& cuttingPoints)
 {
 	inputStream >> L >> N;
 	cuttingPoints.push_back(0);
@@ -156,12 +156,11 @@ int main()
 
 	int L;
 	int N;
-	CuttingPoints cuttingPoints;
+	std::vector<int> cuttingPoints;
 	HandleInput(inputFile, L, N, cuttingPoints);
 	
 
-	CostTable costTable = GetMinCostTable(cuttingPoints);
-	int minCuttingPrice = costTable[0][costTable.size() - 1];
+	int minCuttingPrice = GetMinCostTable(cuttingPoints);
 
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open())
