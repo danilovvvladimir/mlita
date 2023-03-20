@@ -70,11 +70,11 @@ std::optional<std::vector<int>> FindCombination(int sum, const std::vector<int>&
 	return table[sum];
 }
 
-void HandleOutput(std::ostream& output, const std::optional<std::vector<int>>& resultCombination)
+void HandleOutput(std::ostream& outputStream, const std::optional<std::vector<int>>& resultCombination)
 {
 	if (!resultCombination)
 	{
-		output << "No" << std::endl;
+		outputStream << "No" << std::endl;
 		return;
 	}
 
@@ -95,11 +95,11 @@ void HandleOutput(std::ostream& output, const std::optional<std::vector<int>>& r
 
 	}
 
-	output << uniqueCoins.size() << " " << resultCombination.value().size() << std::endl;
+	outputStream << uniqueCoins.size() << " " << resultCombination.value().size() << std::endl;
 
 	for (auto pair : uniqueCoins)
 	{
-		output << pair.first << " " << pair.second << std::endl;
+		outputStream << pair.first << " " << pair.second << std::endl;
 	}
 
 }
