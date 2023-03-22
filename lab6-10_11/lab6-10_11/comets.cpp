@@ -33,7 +33,7 @@
 
 double FindMaxBrightness(double t, std::vector<std::pair<int, int>>& const coefs)
 {
-	double maxBrightness = std::numeric_limits<double>::min();
+	double maxBrightness = std::numeric_limits<double>::lowest();
 
 	for (int i = 0; i < coefs.size(); ++i)
 	{
@@ -54,7 +54,7 @@ double FindMinBrightness(double T, std::vector<std::pair<int, int>>& const coefs
 {
 	double minBrightness = std::numeric_limits<double>::max();
 
-	for (double t = 0; t <= T; t += 0.1)
+	for (double t = 0; t <= T; t += 0.001)
 	{
 		double const currentBrightness = FindMaxBrightness(t, coefs);
 
