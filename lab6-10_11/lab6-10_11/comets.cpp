@@ -39,7 +39,7 @@ double FindMaxBrightness(double t, std::vector<std::pair<int, int>>& const coefs
 	{
 		int A = coefs[i].first;
 		int B = coefs[i].second;
-		double const Co = A*t + B;
+		double const Co = A * t + B;
 
 		if (Co > maxBrightness)
 		{
@@ -50,21 +50,29 @@ double FindMaxBrightness(double t, std::vector<std::pair<int, int>>& const coefs
 	return maxBrightness;
 }
 
-double FindMinBrightness(double T, std::vector<std::pair<int, int>>& const coefs)
+
+double FindMinBrightness(double T, std::vector<std::pair<int, int>>& coefs)
 {
-	double minBrightness = std::numeric_limits<double>::max();
+	double low = 0;
+	double high = T;
 
-	for (double t = 0; t <= T; t += 0.001)
+
+	while (high - low > 0.000000000001)
 	{
-		double const currentBrightness = FindMaxBrightness(t, coefs);
+		double low3 = (2 * low + high) / 3;
+		double high3 = (low + 2 * high) / 3;
 
-		if (currentBrightness < minBrightness)
+		if (FindMaxBrightness(low3, coefs) > FindMaxBrightness(high3, coefs))
 		{
-			minBrightness = currentBrightness;
+			low = low3;
+		}
+		else
+		{
+			high = high3;
 		}
 	}
 
-	return minBrightness;
+	return FindMaxBrightness((high + low) / 2, coefs);
 }
 
 
@@ -77,7 +85,7 @@ void HandleInput(std::istream& inputStream, int& N, int& T, std::vector<std::pai
 	for (int i = 0; i < N; i++)
 	{
 		inputStream >> A >> B;
-		coefs.push_back({A,B});
+		coefs.push_back({ A,B });
 	}
 }
 
