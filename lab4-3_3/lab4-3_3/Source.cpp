@@ -31,40 +31,10 @@
 #include <fstream>
 #include <vector>
 
-struct TablePosition
-{
-	int firstPoint;
-	int secondPoint;
-};
-
-int GetMinTableCost(TablePosition& position, std::vector<std::vector<int>>& costTable, std::vector<int> & cuttingPoints)
-{
-	int cost = -1;
-	int cutPoiX = cuttingPoints[position.firstPoint];
-	int cutPoiY = cuttingPoints[position.secondPoint];
-	//int length = cuttingPoints[position.y] - cuttingPoints[position.x];
-	int length = cutPoiY - cutPoiX;
-
-	for (size_t i = position.firstPoint + 1; i < position.secondPoint; ++i)
-	{
-		int tempX = costTable[position.firstPoint][i];
-		int tempY = costTable[i][position.secondPoint];
-
-		//int currCost = costTable[position.x][i] + costTable[i][position.y] + length;
-		int currCost = tempX +tempY + length;
-
-		if (currCost < cost || cost == -1)
-		{
-			cost = currCost;
-		}
-	}
-
-	return cost;
-}
-
 void PrintTable(std::vector<std::vector<int>>& table)
 {
 	int tableSize = table.size();
+
 	std::cout << "X " << "\t";
 	for (int i = 0; i < tableSize; i++)
 	{
@@ -92,40 +62,61 @@ void PrintTable(std::vector<std::vector<int>>& table)
 	std::cout << std::endl;
 }
 
+int GetMinTableCost(int tableX, int tableY, std::vector<std::vector<int>>& costTable, std::vector<int> & cuttingPoints)
+{
+	int cost = -1;
+	int cutPoiX = cuttingPoints[tableX];
+	int cutPoiY = cuttingPoints[tableY];
+	int length = cutPoiY - cutPoiX;
 
-int GetMinCostTable(std::vector<int> & cuttingPoints)
+	for (int i = tableX + 1; i < tableY; ++i)
+	{
+		int tempX = costTable[tableX][i];
+		int tempY = costTable[i][tableY];
+
+		int currCost = tempX + tempY + length;
+
+		if (currCost < cost || cost == -1)
+		{
+			cost = currCost;
+		}
+	}
+
+	return cost;
+}
+
+
+int GetMinCuttingCost(std::vector<int> & cuttingPoints)
 {
 	int tableSize = cuttingPoints.size();
 	std::vector<std::vector<int>> table(tableSize, std::vector<int>(tableSize, 0));
 
 	PrintTable(table);
 
-	for (int column = 1; column < tableSize; column++)
+	for (int y = 1; y < tableSize; y++)
 	{
-		TablePosition currPosition = { 0, column };
+		int tableX = 0;
+		int tableY = y;
 
-		while ((currPosition.firstPoint < tableSize) && (currPosition.secondPoint < tableSize))
+		while ((tableY < tableSize))
 		{
-			if (currPosition.secondPoint <= currPosition.firstPoint + 1)
+			if (tableY > tableX + 1)
 			{
-				currPosition.firstPoint++, currPosition.secondPoint++;
-				continue;
+				int currentCost = GetMinTableCost(tableX, tableY, table, cuttingPoints);
+
+				if (currentCost != -1)
+				{
+					table[tableX][tableY] = currentCost;
+				}
+				PrintTable(table);
 			}
 
-			int currentCost = GetMinTableCost(currPosition, table, cuttingPoints);
-
-			if (currentCost != -1)
-			{
-				table[currPosition.firstPoint][currPosition.secondPoint] = currentCost;
-			}
-
-			PrintTable(table);
-
-			currPosition.firstPoint++, currPosition.secondPoint++;
+			tableX++;
+			tableY++;
 		}
 	}
 
-	return table[0][tableSize-1];
+	return table[0][tableSize - 1];
 }
 
 void HandleInput(std::istream& inputStream, int& L, int& N, std::vector<int>& cuttingPoints)
@@ -158,16 +149,15 @@ int main()
 	int N;
 	std::vector<int> cuttingPoints;
 	HandleInput(inputFile, L, N, cuttingPoints);
-	
 
-	int minCuttingPrice = GetMinCostTable(cuttingPoints);
+	int minCuttingCost = GetMinCuttingCost(cuttingPoints);
 
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open())
 	{
 		return 1;
 	}
-	HandleOutput(std::cout, minCuttingPrice);
+	HandleOutput(std::cout, minCuttingCost);
 
 	return 0;
 }
