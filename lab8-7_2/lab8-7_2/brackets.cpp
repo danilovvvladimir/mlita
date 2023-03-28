@@ -72,7 +72,7 @@ int main()
 	int externalBracketsPairs = FindExternalBracketsPairs(bracketsVector);
 
 	std::ofstream outputFile("output.txt");
-	if (!inputFile.is_open())
+	if (!outputFile.is_open())
 	{
 		return 1;
 	}
