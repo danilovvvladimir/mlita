@@ -52,7 +52,7 @@ void FindAllUniquePermutations(std::string word, int startIndex, int endIndex, P
 	}
 }
 
-std::set<std::string> GetPermutationsSet(std::string const& word)
+Permutations GetPermutationsSet(std::string const& word)
 {
 	Permutations uniquePermutationsSet;
 	FindAllUniquePermutations(word, 0, word.size() - 1, uniquePermutationsSet);
@@ -70,7 +70,7 @@ int main()
 	std::string word;
 	HandleInput(inputFile, word);
 
-	std::set<std::string> permutations = GetPermutationsSet(word);
+	Permutations permutations = GetPermutationsSet(word);
 
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open())
