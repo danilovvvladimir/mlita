@@ -22,43 +22,55 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <set>
 
+using Permutations = std::set<std::string>;
 
 void HandleInput(std::istream& inputStream, std::string& word)
 {
 	inputStream >> word;
 }
 
-void HandleOutput(std::ostream& outputStream, std::set<std::string> const& permutations)
+void HandleOutput(std::ostream& outputStream, Permutations const& permutations)
 {
 	for (auto &el : permutations)
 	{
-		outputStream << el;
+		outputStream << el << std::endl;
 	}
 }
 
-std::set<std::string> FindAllPermutationsInString(std::string const& word)
-{
+void FindAllUniquePermutations(std::string word, int startIndex, int endIndex, Permutations& uniquePermutations) {
+	if (startIndex == endIndex) {
+		uniquePermutations.emplace(word);
+	}
+	else {
+		for (int i = startIndex; i <= endIndex; i++) {
+			std::swap(word[startIndex], word[i]);
+			FindAllUniquePermutations(word, startIndex + 1, endIndex, uniquePermutations);
+			std::swap(word[startIndex], word[i]);
+		}
+	}
+}
 
-	std::set<std::string> permutations;
-	return permutations;
+std::set<std::string> GetPermutationsSet(std::string const& word)
+{
+	Permutations uniquePermutationsSet;
+	FindAllUniquePermutations(word, 0, word.size() - 1, uniquePermutationsSet);
+	return uniquePermutationsSet;
 }
 
 int main()
 {
-	std::string word;
-
 	std::ifstream inputFile("input.txt");
 	if (!inputFile.is_open())
 	{
 		return 1;
 	}
 
+	std::string word;
 	HandleInput(inputFile, word);
 
-	std::set<std::string> permutations = FindAllPermutationsInString(word);
+	std::set<std::string> permutations = GetPermutationsSet(word);
 
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open())
