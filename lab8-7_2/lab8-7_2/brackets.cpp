@@ -63,18 +63,21 @@ int FindExternalBracketsPairs(std::vector<int> const& brackets)
 	{
 		int bracketIndex = brackets[i];
 
-		if (bracketIndex >= externalBracketsSize) {
+		if (bracketIndex >= externalBracketsSize)
+		{
 			return externalBracketsSize;
 		}
 
 		repeatedExternalBrackets[bracketIndex]++;
-	}
 
-	for (int i = 0; i < externalBracketsSize; i++)
-	{
-		if (repeatedExternalBrackets[i] > 2)
+		if (repeatedExternalBrackets[bracketIndex] > 2)
 		{
-			return i;
+			return bracketIndex - 1;
+		}
+
+		if (bracketIndex == 0 && repeatedExternalBrackets[bracketIndex] > 1)
+		{
+			return bracketIndex;
 		}
 	}
 
