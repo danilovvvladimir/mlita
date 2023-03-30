@@ -10,7 +10,7 @@
 //	сохраниться, так и нарушиться.Найти наибольшее число пар внешних скобок, которые можно
 //	удалять до первого нарушения правильности последовательности.
 //
-//	Ввод из файла INPUT.TXT.В первой строке задано значение N(1 ≤ N ≤ 3×10 5).Во второй
+//	Ввод из файла INPUT.TXT.В первой строке задано значение N(1 ≤ N ≤ 3×10^5).Во второй
 //	строке находится правильная скобочная последовательность длины 2N.
 //
 //	Вывод в файл OUTPUT.TXT.Вывести единственное значение : указанное число пар внешних
@@ -21,7 +21,7 @@
 //	3		3		5
 //	()()() ((())) ((())(()))
 //	Вывод 1 Вывод 2 Вывод 3
-//	0 3 1
+//	0		3		1
 //
 //	Данилов Владимир, ПС-21. Visual Studio 2017.
 
@@ -29,16 +29,56 @@
 #include <iostream>
 #include <vector>
 
-void HandleInput(std::istream& inputStream, int& N, std::vector<char>& bracketsVector)
+void HandleInput(std::istream& inputStream, std::vector<int>& brackets)
 {
+	int N;
 	inputStream >> N;
-	bracketsVector.assign(2*N, ' ');
+	brackets.assign(2 * N, 0);
+
+	int countBrackets = 0;
 	char tempBracket;
-	for (int i = 0; i < 2*N; i++)
+
+	for (int i = 0; i < 2 * N; i++)
 	{
 		inputStream >> tempBracket;
-		bracketsVector[i] = tempBracket;
+		if (tempBracket == '(')
+		{
+			countBrackets++;
+		}
+		else
+		{
+			countBrackets--;
+		}
+
+		brackets[i] = countBrackets;
 	}
+}
+
+int FindExternalBracketsPairs(std::vector<int> const& brackets)
+{
+	int externalBracketsSize = brackets.size() / 2;
+	std::vector<int> repeatedExternalBrackets(externalBracketsSize, 0);
+
+	for (int i = 0; i < brackets.size(); i++)
+	{
+		int bracketIndex = brackets[i];
+
+		if (bracketIndex >= externalBracketsSize) {
+			return externalBracketsSize;
+		}
+
+		repeatedExternalBrackets[bracketIndex]++;
+	}
+
+	for (int i = 0; i < externalBracketsSize; i++)
+	{
+		if (repeatedExternalBrackets[i] > 2)
+		{
+			return i;
+		}
+	}
+
+	return externalBracketsSize;
 }
 
 void HandleOutput(std::ostream& outputStream, int externalBracketsPairs)
@@ -46,30 +86,18 @@ void HandleOutput(std::ostream& outputStream, int externalBracketsPairs)
 	outputStream << externalBracketsPairs;
 }
 
-int FindExternalBracketsPairs(std::vector<char>& bracketsVector)
-{
-	for (int i = 0; i < bracketsVector.size(); i++)
-	{
-		std::cout << bracketsVector[i] ;
-	}
-	std::cout << std::endl;
-	return 1;
-}
-
 int main()
 {
-	int N;
-
 	std::ifstream inputFile("input.txt");
 	if (!inputFile.is_open())
 	{
 		return 1;
 	}
 
-	std::vector<char> bracketsVector;
-	HandleInput(inputFile, N, bracketsVector);
+	std::vector<int> brackets;
+	HandleInput(inputFile, brackets);
 
-	int externalBracketsPairs = FindExternalBracketsPairs(bracketsVector);
+	int externalBracketsPairs = FindExternalBracketsPairs(brackets);
 
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open())
@@ -77,6 +105,6 @@ int main()
 		return 1;
 	}
 
-	HandleOutput(std::cout, externalBracketsPairs);
+	HandleOutput(outputFile, externalBracketsPairs);
 	return 0;
 }
