@@ -10,8 +10,7 @@
 //	до i - й вершины, затем количество вершин максимального пути, а далее номера вершин
 //	максимального пути.Все числа разделены пробелами.
 //  Если пути в некоторую вершину не существует, то в соответствующей строке выводится слово No.
-//  Если в графе имеется достижимый из начальной вершины цикл положительной длины, 
-//  то вывод состоит из двух строк.
+//  Если в графе имеется достижимый из начальной вершины цикл положительной длины, то вывод состоит из двух строк.
 //  В первой строке выводится слово No, а во второй – количество и номера вершин обнаруженного цикла
 //	через пробел, начиная с его любой вершины и заканчивая ей же.При наличии нескольких циклов
 //	вывести информацию о любом из них.
@@ -40,12 +39,65 @@
 #include <algorithm>
 
 using matrix = std::vector<std::vector<int>>;
+const int MIN_AVAILABLE_INT = std::numeric_limits<int>::min();
 
-matrix HandleInput(std::istream& inputStream, int& vertexesAmount, int& edgesAmount, int& startVertexNumber )
+void BellmanFord(int vertexesAmount, matrix& graph, matrix& paths, int startVertexNumber) 
+{
+	std::vector<int> dist(vertexesAmount, MIN_AVAILABLE_INT);
+	dist[startVertexNumber] = 0;
+	
+
+	for (int i = 0; i < vertexesAmount - 1; i++) 
+	{
+		for (int u = 0; u < vertexesAmount; u++) 
+		{
+			for (int v = 0; v < vertexesAmount; v++) 
+			{
+				int w = graph[u][v];
+				if (w != 0 && dist[u] != MIN_AVAILABLE_INT)
+				{
+					dist[v] = std::max(dist[v], dist[u] + w);
+				}
+			}
+
+		}
+	}
+
+	// check for negative cycles
+	for (int u = 0; u < vertexesAmount; u++) 
+	{
+		for (int v = 0; v < vertexesAmount; v++) 
+		{
+			int w = graph[u][v];
+			if (w != 0 && dist[u] != MIN_AVAILABLE_INT && dist[v] < dist[u] + w)
+			{
+				std::cout << "Negative cycle detected!\n";
+				return;
+			}
+		}
+	}
+	// print the shortest distances
+	for (int i = 0; i < vertexesAmount; i++) 
+	{
+		if (dist[i] == MIN_AVAILABLE_INT)
+		{
+
+			std::cout << "Distance from " << startVertexNumber + 1 << " to " << i + 1 << ": " << "No" << "\n";
+		}
+		else
+		{
+			std::cout << "Distance from " << startVertexNumber + 1 << " to " << i + 1 << ": " << dist[i] << "\n";
+
+		}
+	}
+}
+
+void HandleInput(std::istream& inputStream, int& vertexesAmount, int& edgesAmount, int& startVertexNumber, matrix& graph, matrix& paths)
 {
 	inputStream >> vertexesAmount >> edgesAmount >> startVertexNumber;
 
 	matrix graphMatrix(vertexesAmount, std::vector<int>(vertexesAmount, 0));
+	matrix graphMatrixPaths(vertexesAmount, std::vector<int>(vertexesAmount, 0));
 
 	int startEdge = 0;
 	int finishEdge = 0;
@@ -54,9 +106,14 @@ matrix HandleInput(std::istream& inputStream, int& vertexesAmount, int& edgesAmo
 	for (int i = 0; i < edgesAmount; i++)
 	{
 		inputStream >> startEdge >> finishEdge >> weigthEdge;
-		graphMatrix[startEdge-1][finishEdge-1] = weigthEdge;
+		graphMatrix[startEdge - 1][finishEdge - 1] = weigthEdge;
+
+		// Не запутаться с индексами
+		graphMatrixPaths[startEdge - 1][finishEdge - 1] = finishEdge - 1;
 	}
-	return graphMatrix;
+
+	graph = graphMatrix;
+	paths = graphMatrixPaths;
 }
 
 void HandleOutput(std::ostream& outputStream, matrix const& graphMatrix)
@@ -65,7 +122,7 @@ void HandleOutput(std::ostream& outputStream, matrix const& graphMatrix)
 	{
 		for (int j = 0; j < graphMatrix.size(); j++)
 		{
-			outputStream << graphMatrix[i][j] << " ";
+			outputStream << graphMatrix[i][j] << "   ";
 		}
 		outputStream << std::endl;
 	}
@@ -83,7 +140,10 @@ int main()
 	int edgesAmount = 0;
 	int startVertexNumber = 0;
 
-	matrix graphMatrix = HandleInput(inputFile, vertexesAmount, edgesAmount, startVertexNumber);
+	matrix graphMatrix;
+	matrix graphMatrixPaths;
+
+	HandleInput(inputFile, vertexesAmount, edgesAmount, startVertexNumber, graphMatrix, graphMatrixPaths);
 
 
 
@@ -93,6 +153,15 @@ int main()
 		return 1;
 	}
 
-	HandleOutput(std::cout, graphMatrix);
+
+	BellmanFord(vertexesAmount, graphMatrix, graphMatrixPaths, 0);
+
+	/*for (int i = 0; i < 1000; i++)
+	{
+		outputFile << i << " " << i + 1 << " " << i + 1 << std::endl;
+	}*/
+
+
+	//HandleOutput(std::cout, graphMatrix);
 	return 0;
 }
