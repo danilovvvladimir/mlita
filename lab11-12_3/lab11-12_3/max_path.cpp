@@ -36,68 +36,116 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 
 using matrix = std::vector<std::vector<int>>;
 const int MIN_AVAILABLE_INT = std::numeric_limits<int>::min();
 
-void BellmanFord(int vertexesAmount, matrix& graph, matrix& paths, int startVertexNumber) 
+void BellmanFord(std::ostream& outputStream, int vertexesAmount, matrix& graph, int startVertexNumber)
 {
 	std::vector<int> dist(vertexesAmount, MIN_AVAILABLE_INT);
 	dist[startVertexNumber] = 0;
-	
 
-	for (int i = 0; i < vertexesAmount - 1; i++) 
+	std::vector<int> p(vertexesAmount, -1);
+
+	int cycleFlag;
+
+	bool isChanged = false;
+	for (int i = 0; i < vertexesAmount - 1; i++)
 	{
-		for (int u = 0; u < vertexesAmount; u++) 
+		cycleFlag = -1;
+		for (int u = 0; u < vertexesAmount; u++)
 		{
-			for (int v = 0; v < vertexesAmount; v++) 
+			isChanged = false;
+			for (int v = 0; v < vertexesAmount; v++)
 			{
 				int w = graph[u][v];
-				if (w != 0 && dist[u] != MIN_AVAILABLE_INT)
-				{
-					dist[v] = std::max(dist[v], dist[u] + w);
+				if (w != 0 && dist[u] != MIN_AVAILABLE_INT) {
+
+					if (dist[v] < dist[u] + w) {
+						dist[v] = dist[u] + w;
+						p[v] = u;
+						cycleFlag = u;
+					}
+					isChanged = true;
 				}
 			}
-
+		}
+		if (!isChanged)
+		{
+			break;
 		}
 	}
 
-	// check for negative cycles
-	for (int u = 0; u < vertexesAmount; u++) 
-	{
-		for (int v = 0; v < vertexesAmount; v++) 
+
+	if (cycleFlag != -1) {
+
+
+		for (int u = 0; u < vertexesAmount; u++)
 		{
-			int w = graph[u][v];
-			if (w != 0 && dist[u] != MIN_AVAILABLE_INT && dist[v] < dist[u] + w)
+			for (int v = 0; v < vertexesAmount; v++)
 			{
-				std::cout << "Negative cycle detected!\n";
-				return;
+				int w = graph[u][v];
+				if (w != 0 && dist[u] != MIN_AVAILABLE_INT && dist[v] < dist[u] + w)
+				{
+					outputStream << "No" << std::endl;
+					int tempVertex = cycleFlag;
+					for (int i = 0; i < vertexesAmount; ++i)
+					{
+						tempVertex = p[tempVertex];
+					}
+
+					std::vector<int> path;
+					for (int i = tempVertex; ; i = p[i]) {
+						path.push_back(i);
+						if (i == tempVertex && path.size() > 1)
+						{
+							break;
+						}
+					}
+					reverse(path.begin(), path.end());
+
+					outputStream << path.size() << " ";
+					for (int i = 0; i < path.size(); ++i)
+					{
+						outputStream << path[i] + 1 << ' ';
+					}
+					return;
+				}
 			}
 		}
 	}
-	// print the shortest distances
-	for (int i = 0; i < vertexesAmount; i++) 
+
+	for (int i = 0; i < vertexesAmount; i++)
 	{
 		if (dist[i] == MIN_AVAILABLE_INT)
 		{
-
-			std::cout << "Distance from " << startVertexNumber + 1 << " to " << i + 1 << ": " << "No" << "\n";
+			outputStream << "No" << std::endl;
 		}
 		else
 		{
-			std::cout << "Distance from " << startVertexNumber + 1 << " to " << i + 1 << ": " << dist[i] << "\n";
+			outputStream << dist[i] << " ";
+			std::vector<int> path;
+			for (int j = i; j != -1; j = p[j])
+			{
+				path.push_back(j);
+			}
+			reverse(path.begin(), path.end());
 
+			outputStream << path.size() << " ";
+			for (int i = 0; i < path.size(); ++i)
+			{
+				outputStream << path[i] + 1 << ' ';
+			}
+			outputStream << std::endl;
 		}
 	}
 }
 
-void HandleInput(std::istream& inputStream, int& vertexesAmount, int& edgesAmount, int& startVertexNumber, matrix& graph, matrix& paths)
+void HandleInput(std::istream& inputStream, int& vertexesAmount, int& edgesAmount, int& startVertexNumber, matrix& graph)
 {
 	inputStream >> vertexesAmount >> edgesAmount >> startVertexNumber;
 
 	matrix graphMatrix(vertexesAmount, std::vector<int>(vertexesAmount, 0));
-	matrix graphMatrixPaths(vertexesAmount, std::vector<int>(vertexesAmount, 0));
 
 	int startEdge = 0;
 	int finishEdge = 0;
@@ -107,26 +155,11 @@ void HandleInput(std::istream& inputStream, int& vertexesAmount, int& edgesAmoun
 	{
 		inputStream >> startEdge >> finishEdge >> weigthEdge;
 		graphMatrix[startEdge - 1][finishEdge - 1] = weigthEdge;
-
-		// Не запутаться с индексами
-		graphMatrixPaths[startEdge - 1][finishEdge - 1] = finishEdge - 1;
 	}
 
 	graph = graphMatrix;
-	paths = graphMatrixPaths;
 }
 
-void HandleOutput(std::ostream& outputStream, matrix const& graphMatrix)
-{
-	for (int i = 0; i < graphMatrix.size(); i++)
-	{
-		for (int j = 0; j < graphMatrix.size(); j++)
-		{
-			outputStream << graphMatrix[i][j] << "   ";
-		}
-		outputStream << std::endl;
-	}
-}
 
 int main()
 {
@@ -141,11 +174,8 @@ int main()
 	int startVertexNumber = 0;
 
 	matrix graphMatrix;
-	matrix graphMatrixPaths;
 
-	HandleInput(inputFile, vertexesAmount, edgesAmount, startVertexNumber, graphMatrix, graphMatrixPaths);
-
-
+	HandleInput(inputFile, vertexesAmount, edgesAmount, startVertexNumber, graphMatrix);
 
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open())
@@ -153,15 +183,6 @@ int main()
 		return 1;
 	}
 
-
-	BellmanFord(vertexesAmount, graphMatrix, graphMatrixPaths, 0);
-
-	/*for (int i = 0; i < 1000; i++)
-	{
-		outputFile << i << " " << i + 1 << " " << i + 1 << std::endl;
-	}*/
-
-
-	//HandleOutput(std::cout, graphMatrix);
+	BellmanFord(outputFile, vertexesAmount, graphMatrix, startVertexNumber - 1);
 	return 0;
 }
