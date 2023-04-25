@@ -35,12 +35,7 @@ void HandleOutput(std::ostream& outputStream, LongNumber& M)
 
 LongNumber FindStepsToWin(LongNumber& N)
 {
-	if ((N - 1) > 1)
-	{
-		return N - 1;
-	}
-
-	for (LongNumber i = 3; i <= static_cast<LongNumber>(std::sqrt(N) + 1); i++)
+	for (LongNumber i = 3; i < static_cast<LongNumber>(std::sqrt(N) + 1); i++)
 	{
 		if (N % i == 0)
 		{
@@ -48,10 +43,13 @@ LongNumber FindStepsToWin(LongNumber& N)
 		}
 	}
 
+	if ((N - 1) > 1)
+	{
+		return N - 1;
+	}
+
 	return 0;
 }
-
-
 
 int main()
 {
