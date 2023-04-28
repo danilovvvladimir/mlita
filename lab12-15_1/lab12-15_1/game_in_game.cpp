@@ -70,6 +70,6 @@ int main()
 		return 1;
 	}
 
-	HandleOutput(std::cout, M);
+	HandleOutput(outputFile, M);
 	return 0;
 }
