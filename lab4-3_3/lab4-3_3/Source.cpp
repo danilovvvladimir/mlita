@@ -1,4 +1,4 @@
-﻿//3.3.Распил бруса(7)
+﻿//	3.3.Распил бруса(7)
 //
 //  На пилораму привезли брус длиной L метров.Известны места, в которых необходимо сделать
 //  распилы.Стоимость одного распила равна длине распиливаемого бруса.Различный порядок
@@ -8,30 +8,28 @@
 //  распилить на отметке 4, потом 2 и затем 7, то стоимость составит 10 + 4 + 6 = 20. Требуется написать
 //  программу, которая определяла бы минимальную стоимость распила.
 //
-//  Ввод из файла INPUT.TXT.В первой строке содержатся через пробел натуральные числа L
-//  и N(1 ≤ L ≤ 500, N &lt; L) – длина бруса и число разрезов.Вторая строка содержит N натуральных
-//  чисел C i(0 & lt; C i &lt; L) через пробел, задающих в строго возрастающем порядке места, в которых
-//  нужно сделать распилы.
+//  Ввод из файла INPUT.TXT. В первой строке   содержатся   через пробел натуральные числа L и N (1 ≤ L ≤ 500, N < L) – длина бруса и число разрезов. 
+//  Вторая строка содержит N натуральных чисел Ci (0 <Ci <L ) через пробел, задающих в строго возрастающем порядке места, в которых нужно сделать распилы.
 //
 //  Вывод в файл OUTPUT.TXT.В единственной строке вывести минимальную стоимость
 //  распилов.
 //
 //  Примеры
-//  Ввод 1 Ввод 2
-//  10 2	10 4
-//  2 7		4 5 7 8
-//  Вывод 1 Вывод 2
+//  Ввод 1		Ввод 2
+//  10 2		10 4
+//  2 7			4 5 7 8
+//  Вывод 1		Вывод 2
 //  
-//  17		22
+//  17			22
 //
 //	Данилов Владимир, ПС-21. Visual Studio 2017.
-//
+
 
 #include <iostream>
 #include <fstream>
 #include <vector>
 
-void PrintTable(std::vector<std::vector<int>>& table)
+void PrintTable(std::vector<std::vector<int>> const& table)
 {
 	int tableSize = table.size();
 
@@ -62,21 +60,20 @@ void PrintTable(std::vector<std::vector<int>>& table)
 	std::cout << std::endl;
 }
 
-int GetMinTableCost(int tableX, int tableY, std::vector<std::vector<int>>& costTable, std::vector<int> & cuttingPoints)
+int GetMinTableCost(int tableX, int tableY, std::vector<std::vector<int>> const& costTable, std::vector<int> const& cuttingPoints)
 {
 	int cost = -1;
-	int cutPoiX = cuttingPoints[tableX];
-	int cutPoiY = cuttingPoints[tableY];
-	int length = cutPoiY - cutPoiX;
+	int cutX = cuttingPoints[tableX];
+	int cutY = cuttingPoints[tableY];
 
 	for (int i = tableX + 1; i < tableY; ++i)
 	{
 		int tempX = costTable[tableX][i];
 		int tempY = costTable[i][tableY];
 
-		int currCost = tempX + tempY + length;
+		int currCost = tempX + tempY + cutY - cutX;
 
-		if (currCost < cost || cost == -1)
+		if (cost == -1 || currCost < cost)
 		{
 			cost = currCost;
 		}
@@ -86,14 +83,13 @@ int GetMinTableCost(int tableX, int tableY, std::vector<std::vector<int>>& costT
 }
 
 
-int GetMinCuttingCost(std::vector<int> & cuttingPoints)
+int GetMinCuttingCost(std::vector<int> const& cuttingPoints)
 {
 	int tableSize = cuttingPoints.size();
+
 	std::vector<std::vector<int>> table(tableSize, std::vector<int>(tableSize, 0));
 
-	PrintTable(table);
-
-	for (int y = 1; y < tableSize; y++)
+	for (int y = 0; y < tableSize; y++)
 	{
 		int tableX = 0;
 		int tableY = y;
@@ -108,7 +104,7 @@ int GetMinCuttingCost(std::vector<int> & cuttingPoints)
 				{
 					table[tableX][tableY] = currentCost;
 				}
-				PrintTable(table);
+				//PrintTable(table);
 			}
 
 			tableX++;
@@ -132,9 +128,9 @@ void HandleInput(std::istream& inputStream, int& L, int& N, std::vector<int>& cu
 	cuttingPoints.push_back(L);
 }
 
-void HandleOutput(std::ostream& outputStream, int minCuttingPrice)
+void HandleOutput(std::ostream& outputStream, int minCuttingCost)
 {
-	outputStream << minCuttingPrice << std::endl;
+	outputStream << minCuttingCost << std::endl;
 }
 
 int main()
@@ -148,6 +144,7 @@ int main()
 	int L;
 	int N;
 	std::vector<int> cuttingPoints;
+
 	HandleInput(inputFile, L, N, cuttingPoints);
 
 	int minCuttingCost = GetMinCuttingCost(cuttingPoints);
@@ -157,7 +154,8 @@ int main()
 	{
 		return 1;
 	}
-	HandleOutput(std::cout, minCuttingCost);
+
+	HandleOutput(outputFile, minCuttingCost);
 
 	return 0;
 }
